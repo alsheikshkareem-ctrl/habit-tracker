@@ -1,465 +1,291 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Habit Tracker</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-
+<meta name="theme-color" content="#101126">
+<title>Habitly | Build Better Habits</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+:root{
+ --bg:#101126;--panel:#191a35;--panel2:#202142;--text:#f5f5ff;
+ --muted:#9b9bb8;--purple:#9167ff;--blue:#4d9dff;
+ --green:#40dfac;--pink:#ff6eaa;--yellow:#ffc857;
+ --border:rgba(255,255,255,.09);--shadow:0 15px 45px rgba(0,0,0,.18);
+}
+body.light{
+ --bg:#f3f4fc;--panel:#fff;--panel2:#f0f0fb;--text:#20213c;
+ --muted:#72738f;--border:rgba(30,30,70,.10);--shadow:0 12px 35px rgba(40,40,90,.08);
+}
 *{box-sizing:border-box}
-body{
-  margin:0;
-  padding:15px;
-  background:#e9dce0;
-  color:#303b39;
-  font-family:'Montserrat',sans-serif;
-}
-.app{max-width:1100px;margin:auto}
-.top{
-  background:#f6e9eb;
-  padding:22px;
-  border-radius:15px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:15px;
-  flex-wrap:wrap;
-}
-h1{font-size:25px;margin:0;letter-spacing:3px}
-.subtitle{font-size:12px;color:#777;margin-top:7px}
-.month{
-  display:flex;align-items:center;gap:12px;
-}
-button{cursor:pointer;font-family:inherit}
-.month button,.action{
-  border:0;background:#667e70;color:white;
-  padding:10px 15px;border-radius:7px;
-}
-.month strong{font-size:17px}
-.dashboard{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:12px;margin-top:15px;
-}
-.panel{
-  background:#f7edef;
-  border-radius:12px;
-  padding:16px;
-  min-width:0;
-}
-.panel h3{
-  font-size:13px;color:#60776a;
-  letter-spacing:1px;margin:0 0 15px;
-}
-.big{font-size:29px;font-weight:700}
-.muted{font-size:11px;color:#858585}
-.progress{
-  height:10px;background:#e3d7d9;
-  border-radius:20px;overflow:hidden;margin-top:12px;
-}
-.fill{height:100%;background:#819d89;border-radius:20px}
-.section{
-  background:#f7edef;
-  padding:16px;border-radius:12px;
-  margin-top:15px;
-}
-.section-title{
-  background:#829b8a;color:white;
-  padding:12px;font-size:13px;
-  font-weight:700;letter-spacing:1px;
-  margin:-16px -16px 15px;
-  border-radius:12px 12px 0 0;
-}
-.add{
-  display:flex;gap:8px;margin-bottom:15px;
-}
-.add input{
-  flex:1;min-width:0;padding:11px;
-  border:1px solid #d5c8cb;border-radius:7px;
-  font-size:14px;
-}
-.add button{
-  border:0;background:#829b8a;color:white;
-  padding:10px 15px;border-radius:7px;
-}
-.table-scroll{overflow-x:auto}
-table{
-  border-collapse:collapse;
-  width:100%;
-  min-width:750px;
-  font-size:11px;
-  text-align:center;
-}
-th{
-  background:#e5dadd;color:#596d60;
-  padding:10px 5px;
-}
-td{padding:8px 4px;border-bottom:1px solid #e5dadd}
-.name{text-align:left;min-width:150px;font-weight:600}
-.check{
-  width:16px;height:16px;
-  accent-color:#789481;cursor:pointer;
-}
-.week-head{
-  background:#829b8a;color:white;
-  font-weight:bold;
-}
-.smallbar{
-  height:7px;background:#e2d7d9;
-  border-radius:20px;overflow:hidden;
-  min-width:70px;
-}
-.smallbar span{
-  display:block;height:100%;background:#829b8a;
-}
-.delete{
-  border:0;background:transparent;color:#b46a6a;
-  font-size:16px;
-}
-.week-grid{
-  display:grid;grid-template-columns:repeat(4,1fr);
-  gap:10px;
-}
-.week-card{
-  background:#f5e9eb;padding:12px;border-radius:9px;
-}
-.week-card h4{margin:0 0 8px;color:#718978;font-size:12px}
-.week-card strong{font-size:20px}
-.chart-row{
-  display:grid;grid-template-columns:120px 1fr 45px;
-  align-items:center;gap:10px;margin:12px 0;
-  font-size:11px;
-}
-.chart-row .progress{margin:0}
-.daily-chart{
-  display:flex;align-items:end;gap:4px;
-  height:130px;padding:10px 3px 0;
-  border-bottom:1px solid #cdbfc2;
-}
-.bar-col{
-  flex:1;min-width:0;height:100%;
-  display:flex;flex-direction:column;
-  justify-content:end;align-items:center;
-  gap:5px;
-}
-.bar{
-  width:100%;max-width:24px;
-  background:#829b8a;border-radius:4px 4px 0 0;
-  min-height:2px;
-}
-.bar-label{font-size:9px;color:#777}
-.top-list{padding:0;list-style:none}
-.top-list li{
-  display:flex;justify-content:space-between;
-  gap:8px;padding:9px 0;
-  border-bottom:1px solid #e4d8da;font-size:12px;
-}
-.footer{text-align:center;color:#888;font-size:11px;padding:20px}
-@media(max-width:650px){
-  body{padding:8px}
-  .dashboard{grid-template-columns:repeat(2,1fr)}
-  .week-grid{grid-template-columns:repeat(2,1fr)}
-  h1{font-size:19px}
-  .chart-row{grid-template-columns:90px 1fr 38px}
-}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Cairo',sans-serif;transition:.2s}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.app{max-width:1450px;margin:auto;padding:20px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:25px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:45px;height:45px;border-radius:15px;background:linear-gradient(135deg,#a276ff,#4d9dff);display:grid;place-items:center;font-size:25px;font-weight:900;color:white;box-shadow:0 5px 25px #805dff55}
+.brand h1{font:800 25px Inter,sans-serif;margin:0}
+.brand small{color:var(--muted);font-size:11px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--border);background:var(--panel2);color:var(--text);padding:9px 14px;border-radius:12px;font-weight:700}
+.btn.primary{background:linear-gradient(120deg,#9569ff,#537eff);border:0;color:white}
+.btn.danger{color:#ff718e}
+.hero{padding:27px;border-radius:24px;background:linear-gradient(115deg,#5339a6,#284c9a 65%,#187e9c);position:relative;overflow:hidden;margin-bottom:22px}
+.hero:after{content:"✦";position:absolute;font-size:180px;opacity:.1;right:70%;top:-55px}
+.hero h2{font-size:26px;margin:0 0 5px}
+.hero p{margin:0;color:#e4e0ff}
+.hero-stats{display:flex;gap:30px;flex-wrap:wrap;margin-top:22px}
+.hero-stats strong{font-size:23px;display:block}
+.hero-stats span{font-size:12px;color:#ddd7ff}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:19px;padding:18px;box-shadow:var(--shadow)}
+.stat{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.stat-icon{width:43px;height:43px;border-radius:14px;display:grid;place-items:center;font-size:21px}
+.stat strong{font:800 25px Inter,sans-serif;display:block;margin-top:12px}
+.stat small{color:var(--muted)}
+.layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(260px,.8fr);gap:18px}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}
+.section-head h3{margin:0;font-size:18px}
+.date-label{color:var(--muted);font-size:12px}
+.habit-list{display:grid;gap:10px}
+.habit{display:flex;align-items:center;gap:12px;background:var(--panel2);padding:13px;border-radius:15px;border:1px solid var(--border)}
+.habit-emoji{width:43px;height:43px;border-radius:13px;background:var(--panel);display:grid;place-items:center;font-size:22px}
+.habit-info{flex:1;min-width:0}
+.habit-info strong{display:block;font-size:14px}
+.habit-info small{color:var(--muted);font-size:11px}
+.progress{height:5px;background:var(--border);border-radius:9px;margin-top:7px;overflow:hidden}
+.progress i{height:100%;display:block;background:linear-gradient(90deg,var(--purple),var(--green));border-radius:9px}
+.check{width:38px;height:38px;border:1px solid var(--border);border-radius:12px;background:transparent;color:var(--muted);font-size:19px}
+.check.done{background:var(--green);color:#102d28;border:0}
+.habit-tools{display:flex;gap:5px}
+.mini{border:0;background:transparent;color:var(--muted);padding:6px;font-size:15px}
+.empty{text-align:center;color:var(--muted);padding:30px}
+.side{display:grid;gap:16px;align-content:start}
+.ring{width:145px;height:145px;border-radius:50%;margin:12px auto;display:grid;place-items:center;background:conic-gradient(var(--green) var(--p,0%),var(--panel2) 0);position:relative}
+.ring:before{content:"";position:absolute;inset:10px;border-radius:50%;background:var(--panel)}
+.ring div{position:relative;text-align:center}
+.ring strong{font:800 27px Inter}
+.ring small{display:block;color:var(--muted)}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:14px}
+.day{text-align:center;font-size:10px;color:var(--muted)}
+.day i{display:grid;place-items:center;margin:7px auto 0;width:30px;height:30px;border-radius:10px;background:var(--panel2);font-style:normal;color:var(--text)}
+.day i.active{background:var(--green);color:#102d28}
+.challenge{background:linear-gradient(135deg,#31265e,#202d55);border:1px solid #8263e755;border-radius:17px;padding:16px}
+.challenge strong{display:block;margin-bottom:6px}
+.challenge p{font-size:12px;color:#d2c9ff;margin:0}
+.challenge .progress{background:#ffffff25}
+.level{display:flex;justify-content:space-between;align-items:center}
+.level strong{font-size:23px;color:var(--yellow)}
+.calendar-wrap{margin-top:18px;overflow-x:auto}
+.calendar{display:grid;grid-template-columns:repeat(7,minmax(30px,1fr));gap:5px}
+.calendar div{text-align:center;font-size:11px}
+.calendar .cell{background:var(--panel2);border-radius:8px;padding:8px 2px;color:var(--muted)}
+.calendar .cell.marked{background:#36d5a133;color:var(--green)}
+.calendar .cell.today{outline:1px solid var(--purple)}
+footer{text-align:center;padding:25px;color:var(--muted);font-size:11px}
+.modal{display:none;position:fixed;inset:0;background:#0009;z-index:5;align-items:center;justify-content:center;padding:15px}
+.modal.show{display:flex}
+.modal-box{width:min(430px,100%);background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:22px}
+.modal-box h3{margin-top:0}
+.field{display:grid;gap:6px;margin:12px 0}
+.field label{font-size:12px;color:var(--muted)}
+.field input,.field select{width:100%;padding:11px;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:11px;outline:none}
+.modal-actions{display:flex;gap:8px;margin-top:18px}
+.modal-actions button{flex:1}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--green);color:#102d28;padding:11px 20px;border-radius:13px;font-weight:700;display:none;z-index:10}
+.toast.show{display:block}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.app{padding:13px}.hero{padding:21px}.hero h2{font-size:21px}.stats{gap:9px}.card{padding:13px}.habit{gap:8px;padding:10px}.habit-emoji{width:37px;height:37px}.topbar{align-items:flex-start}.brand h1{font-size:22px}.btn{padding:8px 10px;font-size:12px}}
 </style>
 </head>
-
 <body>
 <div class="app">
-
-<header class="top">
-  <div>
-    <h1>HABIT TRACKER</h1>
-    <div class="subtitle">BUILD DISCIPLINE. ONE DAY AT A TIME.</div>
-  </div>
-  <div class="month">
-    <button onclick="moveMonth(-1)">‹</button>
-    <strong id="monthTitle"></strong>
-    <button onclick="moveMonth(1)">›</button>
-  </div>
+<header class="topbar">
+ <div class="brand">
+  <div class="logo">H</div>
+  <div><h1>Habitly</h1><small id="tagline">Build better habits.</small></div>
+ </div>
+ <div class="actions">
+  <button class="btn" onclick="toggleLang()" id="langBtn">EN</button>
+  <button class="btn" onclick="toggleTheme()" id="themeBtn">☀️</button>
+  <button class="btn" onclick="backup()">⬇️</button>
+  <button class="btn" onclick="document.getElementById('restoreFile').click()">⬆️</button>
+  <input type="file" id="restoreFile" accept=".json" hidden onchange="restore(event)">
+ </div>
 </header>
 
-<div class="dashboard">
-  <div class="panel">
-    <h3>MONTHLY PROGRESS</h3>
-    <div class="big" id="progressNumber">0%</div>
-    <div class="progress"><div class="fill" id="mainProgress"></div></div>
-    <div class="muted" id="progressText">0 / 0 completed</div>
-  </div>
+<section class="hero">
+ <h2 id="welcome">كل يوم فرصة لتكون أفضل! ✨</h2>
+ <p id="heroText">ابدأ بخطوة صغيرة، واستمر حتى تصنع فرقاً كبيراً.</p>
+ <div class="hero-stats">
+  <div><strong id="heroDone">0</strong><span id="labelDone">إنجاز اليوم</span></div>
+  <div><strong id="heroStreak">0 🔥</strong><span id="labelStreak">أيام الاستمرار</span></div>
+  <div><strong id="heroPoints">0</strong><span id="labelPoints">نقاطك</span></div>
+ </div>
+</section>
 
-  <div class="panel">
-    <h3>DAILY HABITS</h3>
-    <div class="big" id="habitNumber">12</div>
-    <div class="muted">Active habits</div>
-  </div>
+<section class="stats">
+ <div class="card"><div class="stat"><div class="stat-icon" style="background:#9167ff22">🎯</div><small id="s1">نسبة اليوم</small></div><strong id="todayRate">0%</strong><small id="s1b">من أهدافك اليومية</small></div>
+ <div class="card"><div class="stat"><div class="stat-icon" style="background:#40dfac22">✅</div><small id="s2">الإنجازات</small></div><strong id="totalDone">0</strong><small id="s2b">إجمالي الإنجازات</small></div>
+ <div class="card"><div class="stat"><div class="stat-icon" style="background:#ff6eaa22">🔥</div><small id="s3">أفضل سلسلة</small></div><strong id="bestStreak">0</strong><small id="s3b">أيام متتالية</small></div>
+ <div class="card"><div class="stat"><div class="stat-icon" style="background:#ffc85722">🏆</div><small id="s4">المستوى</small></div><strong id="levelNum">1</strong><small id="s4b">استمر في التقدم</small></div>
+</section>
 
-  <div class="panel">
-    <h3>COMPLETED</h3>
-    <div class="big" id="completedNumber">0</div>
-    <div class="muted">Completed habit days</div>
+<div class="layout">
+<main>
+ <section class="card">
+  <div class="section-head">
+   <div><h3 id="habitsTitle">عادات اليوم</h3><div class="date-label" id="todayDate"></div></div>
+   <button class="btn primary" onclick="openModal()">＋ <span id="addText">إضافة عادة</span></button>
   </div>
+  <div id="habitList" class="habit-list"></div>
+ </section>
+ <section class="card calendar-wrap">
+  <div class="section-head"><h3 id="calendarTitle">تقويم الشهر</h3><span class="date-label" id="monthName"></span></div>
+  <div class="calendar" id="calendar"></div>
+ </section>
+</main>
 
-  <div class="panel">
-    <h3>REMAINING</h3>
-    <div class="big" id="remainingNumber">0</div>
-    <div class="muted">Habit days remaining</div>
+<aside class="side">
+ <section class="card">
+  <div class="section-head"><h3 id="progressTitle">إنجاز اليوم</h3>📊</div>
+  <div class="ring" id="ring"><div><strong id="ringNum">0%</strong><small id="ringLabel">مكتمل</small></div></div>
+  <div style="text-align:center;color:var(--muted);font-size:12px" id="progressHint">كل خطوة تصنع فرقاً</div>
+ </section>
+ <section class="card">
+  <div class="section-head"><h3 id="weekTitle">هذا الأسبوع</h3>📅</div>
+  <div class="week" id="week"></div>
+ </section>
+ <section class="card">
+  <div class="section-head"><h3 id="challengeTitle">تحدي الأسبوع</h3>⚡</div>
+  <div class="challenge">
+   <strong id="challengeName">7 أيام من الالتزام</strong>
+   <p id="challengeDesc">أنجز عادة واحدة على الأقل كل يوم.</p>
+   <div class="progress"><i id="challengeBar" style="width:0%"></i></div>
+   <p style="margin-top:8px" id="challengeCount">0 / 7 أيام</p>
   </div>
-
-  <div class="panel">
-    <h3>BEST DAY</h3>
-    <div class="big" id="bestDay">—</div>
-    <div class="muted">Most completed habits</div>
-  </div>
-
-  <div class="panel">
-    <h3>CONSISTENCY</h3>
-    <div class="big" id="consistency">0%</div>
-    <div class="muted">Monthly completion rate</div>
-  </div>
+ </section>
+ <section class="card">
+  <div class="level"><div><small id="levelLabel">مستواك الحالي</small><h3 id="levelName">المبتدئ</h3></div><strong id="levelEmoji">🌱</strong></div>
+  <div class="progress"><i id="levelBar" style="width:0%"></i></div>
+  <small id="levelProgress" style="color:var(--muted)">0 نقطة للمستوى التالي</small>
+ </section>
+</aside>
+</div>
+<footer>Habitly © 2026 · <span id="footerText">Small steps. Big changes.</span></footer>
 </div>
 
-<div class="section">
-  <div class="section-title">DAILY HABITS</div>
-  <div class="add">
-    <input id="habitInput" placeholder="Add a new habit...">
-    <button onclick="addHabit()">+ ADD HABIT</button>
-  </div>
-  <div class="table-scroll">
-    <table>
-      <thead id="tableHead"></thead>
-      <tbody id="tableBody"></tbody>
-    </table>
-  </div>
+<div class="modal" id="modal">
+ <div class="modal-box">
+  <h3 id="modalTitle">إضافة عادة جديدة</h3>
+  <div class="field"><label id="nameLabel">اسم العادة</label><input id="habitName" maxlength="45" placeholder="مثلاً: قراءة 10 صفحات"></div>
+  <div class="field"><label id="iconLabel">اختر رمزاً</label><select id="habitIcon"><option>📚</option><option>💪</option><option>💧</option><option>🧘</option><option>🏃</option><option>🥗</option><option>😴</option><option>🕌</option><option>🎯</option><option>✍️</option><option>💻</option><option>❤️</option></select></div>
+  <div class="field"><label id="goalLabel">الهدف الأسبوعي</label><select id="habitGoal"><option value="3">3 أيام</option><option value="5" selected>5 أيام</option><option value="7">7 أيام</option></select></div>
+  <div class="modal-actions"><button class="btn primary" onclick="saveHabit()" id="saveBtn">حفظ</button><button class="btn" onclick="closeModal()" id="cancelBtn">إلغاء</button></div>
+ </div>
 </div>
-
-<div class="section">
-  <div class="section-title">WEEKLY TRACKER</div>
-  <div class="week-grid" id="weeklyCards"></div>
-</div>
-
-<div class="section">
-  <div class="section-title">DAILY TOTALS</div>
-  <div class="daily-chart" id="dailyChart"></div>
-</div>
-
-<div class="section">
-  <div class="section-title">HABIT PERFORMANCE</div>
-  <div id="performance"></div>
-</div>
-
-<div class="section">
-  <div class="section-title">TOP 10 MOST CONSISTENT HABITS</div>
-  <ol class="top-list" id="topList"></ol>
-</div>
-
-<div class="footer">
-  YOUR GOALS. YOUR HABITS. YOUR PROGRESS.
-  <br>Automatically saved on this device.
-</div>
-
-</div>
+<div class="toast" id="toast"></div>
 
 <script>
-const KEY="full_habit_tracker_v1";
-
-let date=new Date();
-let habits=[];
-
-const defaultHabits=[
- "Wake up at 6:00",
- "Meditation",
- "Gym",
- "Cold Shower",
- "Work",
- "Read 10 pages",
- "Learn a skill",
- "No sugar",
- "No alcohol",
- "1h without social media",
- "Planning",
- "Sleep before 11:00"
-];
-
-function load(){
- try{
-  let saved=JSON.parse(localStorage.getItem(KEY));
-  if(saved && Array.isArray(saved.habits)){
-   habits=saved.habits;
-  }else{
-   habits=defaultHabits.map((name,i)=>({
-    id:i+1,name,days:{}
-   }));
-  }
- }catch(e){
-  habits=defaultHabits.map((name,i)=>({
-   id:i+1,name,days:{}
-  }));
+const $=id=>document.getElementById(id);
+const today=()=>new Date().toLocaleDateString('en-CA');
+const dateOffset=(n)=>{let d=new Date();d.setDate(d.getDate()+n);return d.toLocaleDateString('en-CA')};
+const translations={
+ ar:{
+ tagline:"ابنِ عادات أفضل.",welcome:"كل يوم فرصة لتكون أفضل! ✨",hero:"ابدأ بخطوة صغيرة، واستمر حتى تصنع فرقاً كبيراً.",
+ done:"إنجاز اليوم",streak:"أيام الاستمرار",points:"نقاطك",s1:"نسبة اليوم",s1b:"من أهدافك اليومية",s2:"الإنجازات",s2b:"إجمالي الإنجازات",s3:"أفضل سلسلة",s3b:"أيام متتالية",s4:"المستوى",s4b:"استمر في التقدم",
+ habits:"عادات اليوم",add:"إضافة عادة",calendar:"تقويم الشهر",progress:"إنجاز اليوم",complete:"مكتمل",hint:"كل خطوة تصنع فرقاً",week:"هذا الأسبوع",challenge:"تحدي الأسبوع",challengeName:"7 أيام من الالتزام",challengeDesc:"أنجز عادة واحدة على الأقل كل يوم.",level:"مستواك الحالي",footer:"خطوات صغيرة. تغييرات كبيرة.",
+ modal:"إضافة عادة جديدة",name:"اسم العادة",icon:"اختر رمزاً",goal:"الهدف الأسبوعي",save:"حفظ",cancel:"إلغاء",days:"أيام",empty:"لا توجد عادات بعد. أضف عادتك الأولى!",edit:"تعديل",delete:"حذف",confirm:"هل تريد حذف هذه العادة؟",saved:"تم الحفظ بنجاح!",marked:"أحسنت! تم تسجيل الإنجاز 🎉",unmarked:"تم إلغاء الإنجاز",today:"اليوم",levelNames:["المبتدئ","المستمر","الملتزم","المحترف","الأسطورة"],next:"نقطة للمستوى التالي",weekdays:["أحد","إثن","ثلا","أرب","خمي","جمع","سبت"],month:"ar"
+ },
+ en:{
+ tagline:"Build better habits.",welcome:"Every day is a new opportunity! ✨",hero:"Start small. Stay consistent. Make a difference.",
+ done:"Today's wins",streak:"Day streak",points:"Your points",s1:"Today's rate",s1b:"of daily goals",s2:"Completions",s2b:"Total completions",s3:"Best streak",s3b:"consecutive days",s4:"Level",s4b:"Keep moving forward",
+ habits:"Today's habits",add:"Add habit",calendar:"Monthly calendar",progress:"Today's progress",complete:"Complete",hint:"Every small step counts",week:"This week",challenge:"Weekly challenge",challengeName:"7 days of consistency",challengeDesc:"Complete at least one habit every day.",level:"Your current level",footer:"Small steps. Big changes.",
+ modal:"Add a new habit",name:"Habit name",icon:"Choose an icon",goal:"Weekly goal",save:"Save",cancel:"Cancel",days:"days",empty:"No habits yet. Add your first habit!",edit:"Edit",delete:"Delete",confirm:"Delete this habit?",saved:"Saved successfully!",marked:"Great job! Completion recorded 🎉",unmarked:"Completion removed",today:"Today",levelNames:["Beginner","Consistent","Committed","Pro","Legend"],next:"points to next level",weekdays:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],month:"en"
+ }};
+let lang=localStorage.getItem("habitly_lang")||"ar";
+let data;
+try{data=JSON.parse(localStorage.getItem("habitly_data"))}catch(e){}
+if(!data)data={habits:[
+{id:1,name:"قراءة 10 صفحات",icon:"📚",goal:5,logs:[]},
+{id:2,name:"ممارسة الرياضة",icon:"💪",goal:5,logs:[]},
+{id:3,name:"شرب الماء",icon:"💧",goal:7,logs:[]},
+{id:4,name:"تعلم مهارة جديدة",icon:"🧠",goal:4,logs:[]},
+{id:5,name:"النوم مبكراً",icon:"😴",goal:6,logs:[]}
+]};
+let editId=null;
+function save(){localStorage.setItem("habitly_data",JSON.stringify(data))}
+function t(key){return translations[lang][key]||key}
+function toast(msg){$("toast").textContent=msg;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),2200)}
+function toggleLang(){lang=lang==="ar"?"en":"ar";localStorage.setItem("habitly_lang",lang);render()}
+function toggleTheme(){document.body.classList.toggle("light");localStorage.setItem("habitly_theme",document.body.classList.contains("light")?"light":"dark")}
+if(localStorage.getItem("habitly_theme")==="light")document.body.classList.add("light");
+function isDone(h,d=today()){return h.logs.includes(d)}
+function total(){return data.habits.reduce((n,h)=>n+h.logs.length,0)}
+function points(){return total()*10}
+function streak(){
+ let n=0;
+ for(let i=0;i<365;i++){let d=dateOffset(-i);if(data.habits.some(h=>isDone(h,d)))n++;else break}
+ return n
+}
+function bestStreak(){
+ let best=0,current=0;
+ for(let i=364;i>=0;i--){let d=dateOffset(-i);if(data.habits.some(h=>isDone(h,d))){current++;best=Math.max(best,current)}else current=0}
+ return best
+}
+function level(){return Math.floor(points()/100)+1}
+function todayRate(){let n=data.habits.filter(h=>isDone(h)).length;return data.habits.length?Math.round(n/data.habits.length*100):0}
+function applyTranslations(){
+ let map={tagline:"tagline",welcome:"welcome",heroText:"hero",labelDone:"done",labelStreak:"streak",labelPoints:"points",s1:"s1",s1b:"s1b",s2:"s2",s2b:"s2b",s3:"s3",s3b:"s3b",s4:"s4",s4b:"s4b",habitsTitle:"habits",addText:"add",calendarTitle:"calendar",progressTitle:"progress",ringLabel:"complete",progressHint:"hint",weekTitle:"week",challengeTitle:"challenge",challengeName:"challengeName",challengeDesc:"challengeDesc",levelLabel:"level",footerText:"footer",modalTitle:"modal",nameLabel:"name",iconLabel:"icon",goalLabel:"goal",saveBtn:"save",cancelBtn:"cancel"};
+ Object.keys(map).forEach(id=>$(id).textContent=t(map[id]));
+ $("langBtn").textContent=lang==="ar"?"EN":"عربي";
+ document.documentElement.lang=lang;document.documentElement.dir=lang==="ar"?"rtl":"ltr";
+ document.body.style.fontFamily=lang==="ar"?"Cairo,sans-serif":"Inter,sans-serif";
+}
+function renderHabits(){
+ let list=$("habitList");list.innerHTML="";
+ if(!data.habits.length){list.innerHTML='<div class="empty">'+t("empty")+'</div>';return}
+ data.habits.forEach(h=>{
+  let count=h.logs.length;
+  let el=document.createElement("div");el.className="habit";
+  let icon=document.createElement("div");icon.className="habit-emoji";icon.textContent=h.icon;
+  let info=document.createElement("div");info.className="habit-info";
+  let name=document.createElement("strong");name.textContent=h.name;
+  let sub=document.createElement("small");sub.textContent=count+" · "+t("goal")+" "+h.goal+" "+t("days");
+  let bar=document.createElement("div");bar.className="progress";let fill=document.createElement("i");fill.style.width=Math.min(100,count/Math.max(1,h.goal*4)*100)+"%";bar.append(fill);
+  info.append(name,sub,bar);
+  let tools=document.createElement("div");tools.className="habit-tools";
+  let edit=document.createElement("button");edit.className="mini";edit.textContent="✏️";edit.title=t("edit");edit.onclick=()=>openModal(h.id);
+  let del=document.createElement("button");del.className="mini";del.textContent="🗑️";del.title=t("delete");del.onclick=()=>deleteHabit(h.id);
+  tools.append(edit,del);
+  let check=document.createElement("button");check.className="check"+(isDone(h)?" done":"");check.textContent=isDone(h)?"✓":"○";check.onclick=()=>toggleDone(h.id);
+  el.append(icon,info,tools,check);list.append(el);
+ })
+}
+function renderWeek(){
+ let box=$("week");box.innerHTML="";
+ let d=new Date();let day=d.getDay();
+ for(let i=0;i<7;i++){
+  let date=new Date();date.setDate(date.getDate()-day+i);
+  let key=date.toLocaleDateString("en-CA");
+  let el=document.createElement("div");el.className="day";
+  let label=document.createElement("span");label.textContent=t("weekdays")[i];
+  let dot=document.createElement("i");let count=data.habits.filter(h=>isDone(h,key)).length;dot.textContent=count?count:"·";if(count)dot.className="active";
+  el.append(label,dot);box.append(el)
  }
+ let days=0;for(let i=0;i<7;i++){let key=dateOffset(-i);if(data.habits.some(h=>isDone(h,key)))days++}
+ $("challengeBar").style.width=days/7*100+"%";$("challengeCount").textContent=days+" / 7 "+t("days")
 }
-
-function save(){
- localStorage.setItem(KEY,JSON.stringify({habits}));
-}
-
-function key(){
- return date.getFullYear()+"-"+(date.getMonth()+1);
-}
-
-function daysInMonth(){
- return new Date(date.getFullYear(),date.getMonth()+1,0).getDate();
-}
-
-function done(h,d){
- return !!h.days[key()]?.includes(d);
-}
-
-function toggle(id,d,checked){
- let h=habits.find(x=>x.id===id);
- if(!h)return;
- if(!h.days[key()])h.days[key()]=[];
- let arr=h.days[key()];
- if(checked && !arr.includes(d))arr.push(d);
- if(!checked)h.days[key()]=arr.filter(x=>x!==d);
- save();render();
-}
-
-function addHabit(){
- let input=document.getElementById("habitInput");
- let name=input.value.trim();
- if(!name){alert("Enter a habit name");return;}
- habits.push({
-  id:Date.now()+Math.random(),
-  name:name,
-  days:{}
- });
- input.value="";
- save();render();
-}
-
-function deleteHabit(id){
- if(!confirm("Delete this habit?"))return;
- habits=habits.filter(h=>h.id!==id);
- save();render();
-}
-
-function moveMonth(n){
- date=new Date(date.getFullYear(),date.getMonth()+n,1);
- render();
-}
-
-function render(){
- const days=daysInMonth();
- const k=key();
- const monthName=date.toLocaleDateString("en-US",{month:"long",year:"numeric"});
-
- document.getElementById("monthTitle").textContent=monthName;
-
- let head="<tr><th>HABIT</th>";
- for(let d=1;d<=days;d++)head+=`<th>${d}</th>`;
- head+="<th>COUNT</th><th>PERCENT</th><th></th></tr>";
- document.getElementById("tableHead").innerHTML=head;
-
- let body="";
- let total=0;
- let completed=0;
- let daily=Array(days).fill(0);
- let performances=[];
-
- habits.forEach(h=>{
-  let count=0;
-  let row=`<tr><td class="name">${escapeHTML(h.name)}</td>`;
-
-  for(let d=1;d<=days;d++){
-   let yes=done(h,d);
-   if(yes){count++;total++;daily[d-1]++;}
-   row+=`<td><input class="check" type="checkbox"
-    ${yes?"checked":""}
-    onchange="toggle(${JSON.stringify(h.id)},${d},this.checked)"></td>`;
-  }
-
-  completed+=count;
-  let pct=days?Math.round(count/days*100):0;
-  performances.push({name:h.name,count,pct});
-
-  row+=`<td>${count} / ${days}</td>
-  <td><b>${pct}%</b><div class="smallbar">
-  <span style="width:${pct}%"></span></div></td>
-  <td><button class="delete" onclick="deleteHabit(${JSON.stringify(h.id)})">×</button></td></tr>`;
-  body+=row;
- });
-
- document.getElementById("tableBody").innerHTML=body;
-
- let possible=habits.length*days;
- let percent=possible?Math.round(completed/possible*100):0;
-
- document.getElementById("progressNumber").textContent=percent+"%";
- document.getElementById("mainProgress").style.width=percent+"%";
- document.getElementById("progressText").textContent=completed+" / "+possible+" completed";
- document.getElementById("habitNumber").textContent=habits.length;
- document.getElementById("completedNumber").textContent=completed;
- document.getElementById("remainingNumber").textContent=possible-completed;
- document.getElementById("consistency").textContent=percent+"%";
-
- let best=Math.max(0,...daily);
- let bestIndex=daily.indexOf(best);
- document.getElementById("bestDay").textContent=best?bestIndex+1:"—";
-
- let weeks=[];
- for(let start=1;start<=days;start+=7){
-  let end=Math.min(start+6,days);
-  let amount=0;
-  for(let d=start;d<=end;d++)amount+=daily[d-1];
-  let max=habits.length*(end-start+1);
-  let p=max?Math.round(amount/max*100):0;
-  weeks.push({start,end,amount,max,p});
- }
-
- document.getElementById("weeklyCards").innerHTML=weeks.map((w,i)=>`
- <div class="week-card">
- <h4>WEEK ${i+1} · ${w.start}–${w.end}</h4>
- <strong>${w.p}%</strong>
- <div class="muted">${w.amount} / ${w.max} completed</div>
- <div class="progress"><div class="fill" style="width:${w.p}%"></div></div>
- </div>`).join("");
-
- let maxDaily=Math.max(1,...daily);
- document.getElementById("dailyChart").innerHTML=daily.map((v,i)=>`
- <div class="bar-col" title="Day ${i+1}: ${v}">
- <div class="bar" style="height:${v/maxDaily*100}%"></div>
- <span class="bar-label">${i+1}</span>
- </div>`).join("");
-
- document.getElementById("performance").innerHTML=performances.map(h=>`
- <div class="chart-row">
- <span>${escapeHTML(h.name)}</span>
- <div class="progress"><div class="fill" style="width:${h.pct}%"></div></div>
- <b>${h.pct}%</b>
- </div>`).join("");
-
- performances.sort((a,b)=>b.pct-a.pct||b.count-a.count);
- document.getElementById("topList").innerHTML=performances.slice(0,10).map((h,i)=>`
- <li><span>${i+1}. ${escapeHTML(h.name)}</span><b>${h.pct}% · ${h.count} days</b></li>
- `).join("") || "<li>No habits added yet</li>";
-}
-
-function escapeHTML(s){
- return String(s).replace(/[&<>"']/g,c=>({
- "&":"&amp;","<":"&lt;",">":"&gt;",
- '"':"&quot;","'":"&#039;"
- }[c]));
-}
-
-document.getElementById("habitInput").addEventListener("keydown",e=>{
- if(e.key==="Enter")addHabit();
-});
-
-load();
-render();
-</script>
-</body>
-  </html>
+function renderCalendar(){
+ let box=$("calendar");box.innerHTML="";
+ let now=new Date(),year=now.getFullYear(),month=now.getMonth(),first=new Date(year,month,1).getDay(),num=new Date(year,month+1,0).getDate();
+ $("monthName").textContent=now.toLocaleDateString(lang==="ar"?"ar":"en",{month:"long",year:"numeric"});
+ t("weekdays").forEach(w=>{let e=document.createElement("div");e.textContent=w;box.append(e)});
+ for(let i=0;i<first;i++)box.append(document.createElement("div"));
+ for(let d=1;d<=num;d++){
+  let date=new Date(year,month,d).toLocaleDateString("en-CA");
+  let el=document.createElement("div");el.className="cell";el.textContent=d;
+  if(data.habits.some(h=>isDone(h,da
