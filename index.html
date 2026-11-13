@@ -475,4 +475,223 @@ function renderWeek(){
 
  let days=0;
  for(let i=0;i<7;i++
- 
+   if(data.habits.some(h=>isDone(h,key)))days++;
+ }
+ $("challengeCount").textContent=days+" / 7 "+t("days");
+ $("challengeBar").style.width=(days/7*100)+"%";
+}
+
+function renderCalendar(){
+ const box=$("calendar");
+ box.innerHTML="";
+ const now=new Date();
+ const year=now.getFullYear();
+ const month=now.getMonth();
+ const first=new Date(year,month,1).getDay();
+ const last=new Date(year,month+1,0).getDate();
+
+ $("monthName").textContent=now.toLocaleDateString(
+  lang==="ar"?"ar-JO":"en-US",
+  {month:"long",year:"numeric"}
+ );
+
+ t("weekdays").forEach(day=>{
+  const el=document.createElement("div");
+  el.textContent=day;
+  box.append(el);
+ });
+
+ for(let i=0;i<first;i++){
+  box.append(document.createElement("div"));
+ }
+
+ for(let day=1;day<=last;day++){
+  const el=document.createElement("div");
+  el.className="cell";
+  el.textContent=day;
+
+  const key=dateKey(new Date(year,month,day));
+  if(data.habits.some(h=>isDone(h,key)))el.classList.add("marked");
+  if(day===now.getDate())el.classList.add("today");
+
+  box.append(el);
+ }
+}
+
+function renderStats(){
+ const done=data.habits.filter(h=>isDone(h)).length;
+ const rate=todayRate();
+ const pts=points();
+ const lvl=level();
+ const currentPoints=pts%100;
+
+ $("heroDone").textContent=done;
+ $("heroStreak").textContent=streak()+" 🔥";
+ $("heroPoints").textContent=pts;
+ $("todayRate").textContent=rate+"%";
+ $("totalDone").textContent=total();
+ $("bestStreak").textContent=bestStreak();
+ $("levelNum").textContent=lvl;
+
+ $("ring").style.setProperty("--p",rate+"%");
+ $("ringNum").textContent=rate+"%";
+
+ const names=t("levelNames");
+ $("levelName").textContent=names[Math.min(lvl-1,names.length-1)];
+ $("levelBar").style.width=currentPoints+"%";
+ $("levelProgress").textContent=(100-currentPoints)+" "+t("next");
+
+ $("todayDate").textContent=new Date().toLocaleDateString(
+  lang==="ar"?"ar-JO":"en-US",
+  {weekday:"long",year:"numeric",month:"long",day:"numeric"}
+ );
+}
+
+function render(){
+ applyTranslations();
+ renderHabits();
+ renderWeek();
+ renderCalendar();
+ renderStats();
+ save();
+}
+
+function openModal(id=null){
+ editId=id;
+ $("habitName").value="";
+ $("habitIcon").value="📚";
+ $("habitGoal").value="5";
+
+ if(id!==null){
+  const h=data.habits.find(x=>x.id===id);
+  if(!h)return;
+  $("habitName").value=h.name;
+  $("habitIcon").value=h.icon;
+  $("habitGoal").value=String(h.goal);
+ }
+
+ $("modalTitle").textContent=id===null?t("modal"):t("edit");
+ $("modal").classList.add("show");
+ $("habitName").focus();
+}
+
+function closeModal(){
+ $("modal").classList.remove("show");
+ editId=null;
+}
+
+function saveHabit(){
+ const name=$("habitName").value.trim();
+ if(!name){
+  $("habitName").focus();
+  toast(lang==="ar"?"اكتب اسم العادة أولاً":"Enter a habit name first");
+  return;
+ }
+
+ const icon=$("habitIcon").value;
+ const goal=Number($("habitGoal").value);
+
+ if(editId!==null){
+  const h=data.habits.find(x=>x.id===editId);
+  if(h){
+   h.name=name;
+   h.icon=icon;
+   h.goal=goal;
+  }
+ }else{
+  data.habits.push({
+   id:Date.now()+Math.random(),
+   name,
+   icon,
+   goal,
+   logs:[]
+  });
+ }
+
+ closeModal();
+ render();
+ toast(t("saved"));
+}
+
+function deleteHabit(id){
+ if(!confirm(t("confirm")))return;
+ data.habits=data.habits.filter(h=>h.id!==id);
+ render();
+}
+
+function toggleDone(id){
+ const h=data.habits.find(x=>x.id===id);
+ if(!h)return;
+
+ const key=today();
+ const index=h.logs.indexOf(key);
+
+ if(index===-1){
+  h.logs.push(key);
+  toast(t("marked"));
+ }else{
+  h.logs.splice(index,1);
+  toast(t("unmarked"));
+ }
+
+ render();
+}
+
+function backup(){
+ const blob=new Blob(
+  [JSON.stringify(data,null,2)],
+  {type:"application/json"}
+ );
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement("a");
+ a.href=url;
+ a.download="habitly-backup.json";
+ document.body.appendChild(a);
+ a.click();
+ a.remove();
+ URL.revokeObjectURL(url);
+ toast(lang==="ar"?"تم تنزيل النسخة الاحتياطية":"Backup downloaded");
+}
+
+function restore(event){
+ const file=event.target.files[0];
+ if(!file)return;
+
+ const reader=new FileReader();
+
+ reader.onload=function(){
+  try{
+   const imported=JSON.parse(reader.result);
+
+   if(!imported || !Array.isArray(imported.habits)){
+    throw new Error("Invalid backup");
+   }
+
+   imported.habits.forEach(h=>{
+    if(!Array.isArray(h.logs))h.logs=[];
+    if(!h.id)h.id=Date.now()+Math.random();
+    if(!h.goal)h.goal=5;
+   });
+
+   data=imported;
+   save();
+   render();
+   toast(lang==="ar"?"تمت استعادة البيانات بنجاح":"Data restored successfully");
+  }catch(e){
+   alert(lang==="ar"?"ملف النسخة الاحتياطية غير صالح":"Invalid backup file");
+  }
+
+  event.target.value="";
+ };
+
+ reader.readAsText(file);
+}
+
+$("modal").addEventListener("click",function(event){
+ if(event.target===$("modal"))closeModal();
+});
+
+render();
+</script>
+</body>
+</html>
