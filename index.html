@@ -112,7 +112,7 @@ footer{text-align:center;padding:25px;color:var(--muted);font-size:11px}
   <button class="btn" onclick="toggleLang()" id="langBtn">EN</button>
   <button class="btn" onclick="toggleTheme()" id="themeBtn">☀️</button>
   <button class="btn" onclick="backup()">⬇️</button>
-  <button class="btn" onclick="document.getElementById('restoreFile').click()">⬆️</button>
+  <button class="btn" onclick="$('restoreFile').click()">⬆️</button>
   <input type="file" id="restoreFile" accept=".json" hidden onchange="restore(event)">
  </div>
 </header>
@@ -175,6 +175,7 @@ footer{text-align:center;padding:25px;color:var(--muted);font-size:11px}
  </section>
 </aside>
 </div>
+
 <footer>Habitly © 2026 · <span id="footerText">Small steps. Big changes.</span></footer>
 </div>
 
@@ -190,103 +191,288 @@ footer{text-align:center;padding:25px;color:var(--muted);font-size:11px}
 <div class="toast" id="toast"></div>
 
 <script>
-const $=id=>document.getElementById(id);
-const today=()=>new Date().toLocaleDateString('en-CA');
-const dateOffset=(n)=>{let d=new Date();d.setDate(d.getDate()+n);return d.toLocaleDateString('en-CA')};
+"use strict";
+
+const $ = id => document.getElementById(id);
+
+function dateKey(date = new Date()){
+ const y=date.getFullYear();
+ const m=String(date.getMonth()+1).padStart(2,"0");
+ const d=String(date.getDate()).padStart(2,"0");
+ return `${y}-${m}-${d}`;
+}
+const today=()=>dateKey();
+const dateOffset=n=>{
+ const d=new Date();
+ d.setDate(d.getDate()+n);
+ return dateKey(d);
+};
+
 const translations={
  ar:{
  tagline:"ابنِ عادات أفضل.",welcome:"كل يوم فرصة لتكون أفضل! ✨",hero:"ابدأ بخطوة صغيرة، واستمر حتى تصنع فرقاً كبيراً.",
- done:"إنجاز اليوم",streak:"أيام الاستمرار",points:"نقاطك",s1:"نسبة اليوم",s1b:"من أهدافك اليومية",s2:"الإنجازات",s2b:"إجمالي الإنجازات",s3:"أفضل سلسلة",s3b:"أيام متتالية",s4:"المستوى",s4b:"استمر في التقدم",
- habits:"عادات اليوم",add:"إضافة عادة",calendar:"تقويم الشهر",progress:"إنجاز اليوم",complete:"مكتمل",hint:"كل خطوة تصنع فرقاً",week:"هذا الأسبوع",challenge:"تحدي الأسبوع",challengeName:"7 أيام من الالتزام",challengeDesc:"أنجز عادة واحدة على الأقل كل يوم.",level:"مستواك الحالي",footer:"خطوات صغيرة. تغييرات كبيرة.",
- modal:"إضافة عادة جديدة",name:"اسم العادة",icon:"اختر رمزاً",goal:"الهدف الأسبوعي",save:"حفظ",cancel:"إلغاء",days:"أيام",empty:"لا توجد عادات بعد. أضف عادتك الأولى!",edit:"تعديل",delete:"حذف",confirm:"هل تريد حذف هذه العادة؟",saved:"تم الحفظ بنجاح!",marked:"أحسنت! تم تسجيل الإنجاز 🎉",unmarked:"تم إلغاء الإنجاز",today:"اليوم",levelNames:["المبتدئ","المستمر","الملتزم","المحترف","الأسطورة"],next:"نقطة للمستوى التالي",weekdays:["أحد","إثن","ثلا","أرب","خمي","جمع","سبت"],month:"ar"
+ done:"إنجاز اليوم",streak:"أيام الاستمرار",points:"نقاطك",
+ s1:"نسبة اليوم",s1b:"من أهدافك اليومية",s2:"الإنجازات",s2b:"إجمالي الإنجازات",
+ s3:"أفضل سلسلة",s3b:"أيام متتالية",s4:"المستوى",s4b:"استمر في التقدم",
+ habits:"عادات اليوم",add:"إضافة عادة",calendar:"تقويم الشهر",progress:"إنجاز اليوم",
+ complete:"مكتمل",hint:"كل خطوة تصنع فرقاً",week:"هذا الأسبوع",
+ challenge:"تحدي الأسبوع",challengeName:"7 أيام من الالتزام",
+ challengeDesc:"أنجز عادة واحدة على الأقل كل يوم.",level:"مستواك الحالي",
+ footer:"خطوات صغيرة. تغييرات كبيرة.",modal:"إضافة عادة جديدة",
+ name:"اسم العادة",icon:"اختر رمزاً",goal:"الهدف الأسبوعي",
+ save:"حفظ",cancel:"إلغاء",days:"أيام",
+ empty:"لا توجد عادات بعد. أضف عادتك الأولى!",edit:"تعديل",
+ delete:"حذف",confirm:"هل تريد حذف هذه العادة؟",
+ saved:"تم الحفظ بنجاح!",marked:"أحسنت! تم تسجيل الإنجاز 🎉",
+ unmarked:"تم إلغاء الإنجاز",today:"اليوم",
+ levelNames:["المبتدئ","المستمر","الملتزم","المحترف","الأسطورة"],
+ next:"نقطة للمستوى التالي",
+ weekdays:["أحد","إثن","ثلا","أرب","خمي","جمع","سبت"]
  },
  en:{
- tagline:"Build better habits.",welcome:"Every day is a new opportunity! ✨",hero:"Start small. Stay consistent. Make a difference.",
- done:"Today's wins",streak:"Day streak",points:"Your points",s1:"Today's rate",s1b:"of daily goals",s2:"Completions",s2b:"Total completions",s3:"Best streak",s3b:"consecutive days",s4:"Level",s4b:"Keep moving forward",
- habits:"Today's habits",add:"Add habit",calendar:"Monthly calendar",progress:"Today's progress",complete:"Complete",hint:"Every small step counts",week:"This week",challenge:"Weekly challenge",challengeName:"7 days of consistency",challengeDesc:"Complete at least one habit every day.",level:"Your current level",footer:"Small steps. Big changes.",
- modal:"Add a new habit",name:"Habit name",icon:"Choose an icon",goal:"Weekly goal",save:"Save",cancel:"Cancel",days:"days",empty:"No habits yet. Add your first habit!",edit:"Edit",delete:"Delete",confirm:"Delete this habit?",saved:"Saved successfully!",marked:"Great job! Completion recorded 🎉",unmarked:"Completion removed",today:"Today",levelNames:["Beginner","Consistent","Committed","Pro","Legend"],next:"points to next level",weekdays:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],month:"en"
- }};
+ tagline:"Build better habits.",welcome:"Every day is a new opportunity! ✨",
+ hero:"Start small. Stay consistent. Make a difference.",
+ done:"Today's wins",streak:"Day streak",points:"Your points",
+ s1:"Today's rate",s1b:"of daily goals",s2:"Completions",
+ s2b:"Total completions",s3:"Best streak",s3b:"consecutive days",
+ s4:"Level",s4b:"Keep moving forward",habits:"Today's habits",
+ add:"Add habit",calendar:"Monthly calendar",progress:"Today's progress",
+ complete:"Complete",hint:"Every small step counts",week:"This week",
+ challenge:"Weekly challenge",challengeName:"7 days of consistency",
+ challengeDesc:"Complete at least one habit every day.",
+ level:"Your current level",footer:"Small steps. Big changes.",
+ modal:"Add a new habit",name:"Habit name",icon:"Choose an icon",
+ goal:"Weekly goal",save:"Save",cancel:"Cancel",days:"days",
+ empty:"No habits yet. Add your first habit!",edit:"Edit",
+ delete:"Delete",confirm:"Delete this habit?",
+ saved:"Saved successfully!",marked:"Great job! Completion recorded 🎉",
+ unmarked:"Completion removed",today:"Today",
+ levelNames:["Beginner","Consistent","Committed","Pro","Legend"],
+ next:"points to next level",
+ weekdays:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
+ }
+};
+
 let lang=localStorage.getItem("habitly_lang")||"ar";
 let data;
-try{data=JSON.parse(localStorage.getItem("habitly_data"))}catch(e){}
-if(!data)data={habits:[
-{id:1,name:"قراءة 10 صفحات",icon:"📚",goal:5,logs:[]},
-{id:2,name:"ممارسة الرياضة",icon:"💪",goal:5,logs:[]},
-{id:3,name:"شرب الماء",icon:"💧",goal:7,logs:[]},
-{id:4,name:"تعلم مهارة جديدة",icon:"🧠",goal:4,logs:[]},
-{id:5,name:"النوم مبكراً",icon:"😴",goal:6,logs:[]}
-]};
+
+try{
+ data=JSON.parse(localStorage.getItem("habitly_data"));
+}catch(e){
+ data=null;
+}
+
+if(!data || !Array.isArray(data.habits)){
+ data={habits:[
+  {id:1,name:"قراءة 10 صفحات",icon:"📚",goal:5,logs:[]},
+  {id:2,name:"ممارسة الرياضة",icon:"💪",goal:5,logs:[]},
+  {id:3,name:"شرب الماء",icon:"💧",goal:7,logs:[]},
+  {id:4,name:"تعلم مهارة جديدة",icon:"🧠",goal:4,logs:[]},
+  {id:5,name:"النوم مبكراً",icon:"😴",goal:6,logs:[]}
+ ]};
+}
+
+data.habits.forEach(h=>{
+ if(!Array.isArray(h.logs))h.logs=[];
+ if(!h.id)h.id=Date.now()+Math.random();
+ if(!h.goal)h.goal=5;
+});
+
 let editId=null;
-function save(){localStorage.setItem("habitly_data",JSON.stringify(data))}
-function t(key){return translations[lang][key]||key}
-function toast(msg){$("toast").textContent=msg;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),2200)}
-function toggleLang(){lang=lang==="ar"?"en":"ar";localStorage.setItem("habitly_lang",lang);render()}
-function toggleTheme(){document.body.classList.toggle("light");localStorage.setItem("habitly_theme",document.body.classList.contains("light")?"light":"dark")}
-if(localStorage.getItem("habitly_theme")==="light")document.body.classList.add("light");
-function isDone(h,d=today()){return h.logs.includes(d)}
-function total(){return data.habits.reduce((n,h)=>n+h.logs.length,0)}
-function points(){return total()*10}
+
+function save(){
+ try{
+  localStorage.setItem("habitly_data",JSON.stringify(data));
+ }catch(e){
+  alert("تعذر الحفظ. قد تكون مساحة التخزين ممتلئة.");
+ }
+}
+
+function t(key){
+ return translations[lang][key]||key;
+}
+
+let toastTimer;
+function toast(msg){
+ $("toast").textContent=msg;
+ $("toast").classList.add("show");
+ clearTimeout(toastTimer);
+ toastTimer=setTimeout(()=>$("toast").classList.remove("show"),2200);
+}
+
+function toggleLang(){
+ lang=lang==="ar"?"en":"ar";
+ localStorage.setItem("habitly_lang",lang);
+ render();
+}
+
+function toggleTheme(){
+ document.body.classList.toggle("light");
+ localStorage.setItem("habitly_theme",
+  document.body.classList.contains("light")?"light":"dark");
+}
+
+if(localStorage.getItem("habitly_theme")==="light"){
+ document.body.classList.add("light");
+}
+
+function isDone(h,d=today()){
+ return h.logs.includes(d);
+}
+
+function total(){
+ return data.habits.reduce((n,h)=>n+h.logs.length,0);
+}
+
+function points(){
+ return total()*10;
+}
+
 function streak(){
  let n=0;
- for(let i=0;i<365;i++){let d=dateOffset(-i);if(data.habits.some(h=>isDone(h,d)))n++;else break}
- return n
+ for(let i=0;i<365;i++){
+  let d=dateOffset(-i);
+  if(data.habits.some(h=>isDone(h,d)))n++;
+  else break;
+ }
+ return n;
 }
+
 function bestStreak(){
  let best=0,current=0;
- for(let i=364;i>=0;i--){let d=dateOffset(-i);if(data.habits.some(h=>isDone(h,d))){current++;best=Math.max(best,current)}else current=0}
- return best
+ for(let i=364;i>=0;i--){
+  let d=dateOffset(-i);
+  if(data.habits.some(h=>isDone(h,d))){
+   current++;
+   best=Math.max(best,current);
+  }else current=0;
+ }
+ return best;
 }
-function level(){return Math.floor(points()/100)+1}
-function todayRate(){let n=data.habits.filter(h=>isDone(h)).length;return data.habits.length?Math.round(n/data.habits.length*100):0}
+
+function level(){
+ return Math.floor(points()/100)+1;
+}
+
+function todayRate(){
+ let n=data.habits.filter(h=>isDone(h)).length;
+ return data.habits.length?Math.round(n/data.habits.length*100):0;
+}
+
 function applyTranslations(){
- let map={tagline:"tagline",welcome:"welcome",heroText:"hero",labelDone:"done",labelStreak:"streak",labelPoints:"points",s1:"s1",s1b:"s1b",s2:"s2",s2b:"s2b",s3:"s3",s3b:"s3b",s4:"s4",s4b:"s4b",habitsTitle:"habits",addText:"add",calendarTitle:"calendar",progressTitle:"progress",ringLabel:"complete",progressHint:"hint",weekTitle:"week",challengeTitle:"challenge",challengeName:"challengeName",challengeDesc:"challengeDesc",levelLabel:"level",footerText:"footer",modalTitle:"modal",nameLabel:"name",iconLabel:"icon",goalLabel:"goal",saveBtn:"save",cancelBtn:"cancel"};
- Object.keys(map).forEach(id=>$(id).textContent=t(map[id]));
+ const map={
+  tagline:"tagline",welcome:"welcome",heroText:"hero",
+  labelDone:"done",labelStreak:"streak",labelPoints:"points",
+  s1:"s1",s1b:"s1b",s2:"s2",s2b:"s2b",s3:"s3",s3b:"s3b",
+  s4:"s4",s4b:"s4b",habitsTitle:"habits",addText:"add",
+  calendarTitle:"calendar",progressTitle:"progress",
+  ringLabel:"complete",progressHint:"hint",weekTitle:"week",
+  challengeTitle:"challenge",challengeName:"challengeName",
+  challengeDesc:"challengeDesc",levelLabel:"level",
+  footerText:"footer",modalTitle:"modal",nameLabel:"name",
+  iconLabel:"icon",goalLabel:"goal",saveBtn:"save",
+  cancelBtn:"cancel"
+ };
+ Object.keys(map).forEach(id=>{
+  $(id).textContent=t(map[id]);
+ });
  $("langBtn").textContent=lang==="ar"?"EN":"عربي";
- document.documentElement.lang=lang;document.documentElement.dir=lang==="ar"?"rtl":"ltr";
+ document.documentElement.lang=lang;
+ document.documentElement.dir=lang==="ar"?"rtl":"ltr";
  document.body.style.fontFamily=lang==="ar"?"Cairo,sans-serif":"Inter,sans-serif";
 }
+
 function renderHabits(){
- let list=$("habitList");list.innerHTML="";
- if(!data.habits.length){list.innerHTML='<div class="empty">'+t("empty")+'</div>';return}
+ let list=$("habitList");
+ list.innerHTML="";
+
+ if(!data.habits.length){
+  let empty=document.createElement("div");
+  empty.className="empty";
+  empty.textContent=t("empty");
+  list.append(empty);
+  return;
+ }
+
  data.habits.forEach(h=>{
   let count=h.logs.length;
-  let el=document.createElement("div");el.className="habit";
-  let icon=document.createElement("div");icon.className="habit-emoji";icon.textContent=h.icon;
-  let info=document.createElement("div");info.className="habit-info";
-  let name=document.createElement("strong");name.textContent=h.name;
-  let sub=document.createElement("small");sub.textContent=count+" · "+t("goal")+" "+h.goal+" "+t("days");
-  let bar=document.createElement("div");bar.className="progress";let fill=document.createElement("i");fill.style.width=Math.min(100,count/Math.max(1,h.goal*4)*100)+"%";bar.append(fill);
+  let el=document.createElement("div");
+  el.className="habit";
+
+  let icon=document.createElement("div");
+  icon.className="habit-emoji";
+  icon.textContent=h.icon;
+
+  let info=document.createElement("div");
+  info.className="habit-info";
+
+  let name=document.createElement("strong");
+  name.textContent=h.name;
+
+  let sub=document.createElement("small");
+  sub.textContent=count+" · "+t("goal")+" "+h.goal+" "+t("days");
+
+  let bar=document.createElement("div");
+  bar.className="progress";
+
+  let fill=document.createElement("i");
+  fill.style.width=Math.min(100,count/Math.max(1,h.goal*4)*100)+"%";
+  bar.append(fill);
   info.append(name,sub,bar);
-  let tools=document.createElement("div");tools.className="habit-tools";
-  let edit=document.createElement("button");edit.className="mini";edit.textContent="✏️";edit.title=t("edit");edit.onclick=()=>openModal(h.id);
-  let del=document.createElement("button");del.className="mini";del.textContent="🗑️";del.title=t("delete");del.onclick=()=>deleteHabit(h.id);
+
+  let tools=document.createElement("div");
+  tools.className="habit-tools";
+
+  let edit=document.createElement("button");
+  edit.className="mini";
+  edit.textContent="✏️";
+  edit.title=t("edit");
+  edit.onclick=()=>openModal(h.id);
+
+  let del=document.createElement("button");
+  del.className="mini";
+  del.textContent="🗑️";
+  del.title=t("delete");
+  del.onclick=()=>deleteHabit(h.id);
+
   tools.append(edit,del);
-  let check=document.createElement("button");check.className="check"+(isDone(h)?" done":"");check.textContent=isDone(h)?"✓":"○";check.onclick=()=>toggleDone(h.id);
-  el.append(icon,info,tools,check);list.append(el);
- })
+
+  let check=document.createElement("button");
+  check.className="check"+(isDone(h)?" done":"");
+  check.textContent=isDone(h)?"✓":"○";
+  check.onclick=()=>toggleDone(h.id);
+
+  el.append(icon,info,tools,check);
+  list.append(el);
+ });
 }
+
 function renderWeek(){
- let box=$("week");box.innerHTML="";
- let d=new Date();let day=d.getDay();
+ let box=$("week");
+ box.innerHTML="";
+ let d=new Date();
+ let day=d.getDay();
+
  for(let i=0;i<7;i++){
-  let date=new Date();date.setDate(date.getDate()-day+i);
-  let key=date.toLocaleDateString("en-CA");
-  let el=document.createElement("div");el.className="day";
-  let label=document.createElement("span");label.textContent=t("weekdays")[i];
-  let dot=document.createElement("i");let count=data.habits.filter(h=>isDone(h,key)).length;dot.textContent=count?count:"·";if(count)dot.className="active";
-  el.append(label,dot);box.append(el)
+  let date=new Date();
+  date.setDate(date.getDate()-day+i);
+  let key=dateKey(date);
+
+  let el=document.createElement("div");
+  el.className="day";
+
+  let label=document.createElement("span");
+  label.textContent=t("weekdays")[i];
+
+  let dot=document.createElement("i");
+  let count=data.habits.filter(h=>isDone(h,key)).length;
+  dot.textContent=count?count:"·";
+  if(count)dot.className="active";
+
+  el.append(label,dot);
+  box.append(el);
  }
- let days=0;for(let i=0;i<7;i++){let key=dateOffset(-i);if(data.habits.some(h=>isDone(h,key)))days++}
- $("challengeBar").style.width=days/7*100+"%";$("challengeCount").textContent=days+" / 7 "+t("days")
-}
-function renderCalendar(){
- let box=$("calendar");box.innerHTML="";
- let now=new Date(),year=now.getFullYear(),month=now.getMonth(),first=new Date(year,month,1).getDay(),num=new Date(year,month+1,0).getDate();
- $("monthName").textContent=now.toLocaleDateString(lang==="ar"?"ar":"en",{month:"long",year:"numeric"});
- t("weekdays").forEach(w=>{let e=document.createElement("div");e.textContent=w;box.append(e)});
- for(let i=0;i<first;i++)box.append(document.createElement("div"));
- for(let d=1;d<=num;d++){
-  let date=new Date(year,month,d).toLocaleDateString("en-CA");
-  let el=document.createElement("div");el.className="cell";el.textContent=d;
-  if(data.habits.some(h=>isDone(h,da
+
+ let days=0;
+ for(let i=0;i<7;i++
  
