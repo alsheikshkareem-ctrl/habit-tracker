@@ -49,4 +49,298 @@ const TODAY=()=>dateKey(new Date());
 function dateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function addDays(date,n){const d=new Date(date);d.setDate(d.getDate()+n);return d}
 const DEFAULT={habits:[],reminders:{dailyOn:false,dailyTime:'20:00',habitTimes:{},sent:[]},profile:{alias:'Player',goal:''},points:0,minutes:0,banned:[],sessions:[],achievements:[],settings:{theme:'dark'},reports:[]};
-function loadData(){let raw;try{raw=JSON.parse(localStorage.getItem('habitly_data')||'null')}catch(e){raw=null}const d={...DEFAULT,...(raw||{})};d.habits=Array.isArray(d.habits)?d.habits:[];d.habits=d.habits.map((h,i)=>({...h,id:(/^[A-Za-z0-9_-]{1,80}$/.test(String(h.id??''))?String(h.id):('h'+i+'_'+Date.now())),name:String(h.name||'Habit'),icon:h.icon||'⭐',goal:Number(h.goal)||5,logs:Array.isArray(h.logs)?[...new Set(h.logs.map(String))]:[]}));d.reminders={...DEFAULT.reminders,...(d.reminders||{}),habitTimes:{...(d.reminders?.habitTimes||{})},sent:Array.isArray(d.reminders?.se
+function loadData(){
+  let raw = null;
+  try {
+    raw = JSON.parse(localStorage.getItem('habitly_data') || 'null');
+  } catch(e) {}
+
+  const d = {...DEFAULT, ...(raw || {})};
+  d.habits = Array.isArray(d.habits) ? d.habits : [];
+  d.habits = d.habits.map((h,i)=>({
+    ...h,
+    id: String(h.id || Date.now()+i),
+    name: String(h.name || 'Habit'),
+    icon: h.icon || '⭐',
+    goal: Number(h.goal || 1),
+    logs: Array.isArray(h.logs) ? h.logs : []
+  }));
+  d.reminders = Array.isArray(d.reminders) ? d.reminders : [];
+  d.sessions = Array.isArray(d.sessions) ? d.sessions : [];
+  d.achievements = Array.isArray(d.achievements) ? d.achievements : [];
+  d.profile = {...DEFAULT.profile, ...(d.profile || {})};
+  d.settings = {...DEFAULT.settings, ...(d.settings || {})};
+  d.reports = Array.isArray(d.reports) ? d.reports : [];
+  return d;
+}
+
+let data = loadData();
+let currentDate = new Date();
+let timerInterval = null;
+let timerSeconds = 0;
+let timerRunning = false;
+
+function saveData(){
+  localStorage.setItem('habitly_data', JSON.stringify(data));
+}
+
+function todayKey(){
+  return dateKey(new Date());
+}
+
+function dateKey(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+function toast(message){
+  const el = $('toast');
+  if(!el) return;
+  el.textContent = message;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2500);
+}
+
+function renderHabits(){
+  const list = $('habitList');
+  if(!list) return;
+  list.innerHTML = '';
+
+  if(!data.habits.length){
+    list.innerHTML = '<p>لا توجد عادات بعد. أضف عادتك الأولى!</p>';
+    return;
+  }
+
+  data.habits.forEach(h=>{
+    const done = h.logs.includes(todayKey());
+    const item = document.createElement('div');
+    item.className = 'habit-card';
+    item.innerHTML = `
+      <span>${h.icon} ${escapeHTML(h.name)}</span>
+      <button class="btn ${done?'primary':''}" onclick="toggleHabit('${h.id}')">
+        ${done?'✓ مكتملة':'إكمال'}
+      </button>
+      <button class="btn" onclick="deleteHabit('${h.id}')">حذف</button>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function escapeHTML(s){
+  return String(s).replace(/[&<>"']/g,c=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[c]);
+}
+
+function addHabit(){
+  const name = $('habitName')?.value.trim();
+  const icon = $('habitIcon')?.value || '⭐';
+  const goal = Number($('habitGoal')?.value || 1);
+
+  if(!name){
+    toast('اكتب اسم العادة أولاً');
+    return;
+  }
+
+  data.habits.push({
+    id:String(Date.now()),
+    name,
+    icon,
+    goal,
+    logs:[]
+  });
+
+  saveData();
+  $('habitName').value = '';
+  closeHabitModal();
+  renderAll();
+  toast('تمت إضافة العادة');
+}
+
+function toggleHabit(id){
+  const h = data.habits.find(x=>String(x.id)===String(id));
+  if(!h) return;
+
+  const today = todayKey();
+  h.logs = Array.isArray(h.logs)?h.logs:[];
+  const index = h.logs.indexOf(today);
+
+  if(index >= 0) h.logs.splice(index,1);
+  else h.logs.push(today);
+
+  saveData();
+  renderAll();
+}
+
+function deleteHabit(id){
+  if(!confirm('هل تريد حذف هذه العادة؟')) return;
+  data.habits = data.habits.filter(h=>String(h.id)!==String(id));
+  saveData();
+  renderAll();
+}
+
+function renderStats(){
+  const total = data.habits.length;
+  const done = data.habits.filter(h=>h.logs.includes(todayKey())).length;
+
+  if($('statTotal')) $('statTotal').textContent = total;
+  if($('statDone')) $('statDone').textContent = done;
+  if($('statPercent')) $('statPercent').textContent =
+    total ? Math.round(done/total*100)+'%' : '0%';
+}
+
+function renderCalendar(){
+  const el = $('calendar');
+  if(!el) return;
+  el.innerHTML = '';
+
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+
+  const heading = document.createElement('h3');
+  heading.textContent = new Intl.DateTimeFormat('ar',{month:'long',year:'numeric'}).format(currentDate);
+  el.appendChild(heading);
+
+  const grid = document.createElement('div');
+  grid.className = 'calendar-grid';
+
+  ['ح','ن','ث','ر','خ','ج','س'].forEach(day=>{
+    const cell=document.createElement('div');
+    cell.textContent=day;
+    grid.appendChild(cell);
+  });
+
+  const first = new Date(year,month,1).getDay();
+  const days = new Date(year,month+1,0).getDate();
+
+  for(let i=0;i<first;i++) grid.appendChild(document.createElement('div'));
+
+  for(let day=1;day<=days;day++){
+    const cell=document.createElement('button');
+    cell.textContent=day;
+    const key=dateKey(new Date(year,month,day));
+    if(data.habits.some(h=>h.logs.includes(key))) cell.classList.add('primary');
+    grid.appendChild(cell);
+  }
+
+  el.appendChild(grid);
+}
+
+function changeMonth(amount){
+  currentDate.setMonth(currentDate.getMonth()+amount);
+  renderCalendar();
+}
+
+function renderAll(){
+  renderHabits();
+  renderStats();
+  renderCalendar();
+}
+
+function openHabitModal(){
+  $('habitModal')?.classList.add('open');
+}
+
+function closeHabitModal(){
+  $('habitModal')?.classList.remove('open');
+}
+
+function showSection(name){
+  document.querySelectorAll('[data-section]').forEach(el=>{
+    el.hidden = el.dataset.section !== name;
+  });
+  document.querySelectorAll('[data-nav]').forEach(el=>{
+    el.classList.toggle('active',el.dataset.nav===name);
+  });
+  if(name==='stats') renderStats();
+  if(name==='calendar') renderCalendar();
+}
+
+function startTimer(){
+  if(timerRunning) return;
+  timerRunning=true;
+  timerInterval=setInterval(()=>{
+    timerSeconds++;
+    const el=$('timerDisplay');
+    if(el) el.textContent =
+      String(Math.floor(timerSeconds/60)).padStart(2,'0')+':'+
+      String(timerSeconds%60).padStart(2,'0');
+  },1000);
+}
+
+function pauseTimer(){
+  timerRunning=false;
+  clearInterval(timerInterval);
+}
+
+function resetTimer(){
+  pauseTimer();
+  timerSeconds=0;
+  const el=$('timerDisplay');
+  if(el) el.textContent='00:00';
+}
+
+function setTheme(theme){
+  document.documentElement.dataset.theme=theme;
+  data.settings.theme=theme;
+  saveData();
+}
+
+function toggleTheme(){
+  setTheme(data.settings.theme==='dark'?'light':'dark');
+}
+
+function setLanguage(lang){
+  localStorage.setItem('habitly_lang',lang);
+  location.reload();
+}
+
+function exportCSV(){
+  const rows=[['Habit','Date']];
+  data.habits.forEach(h=>{
+    h.logs.forEach(date=>rows.push([h.name,date]));
+  });
+  const csv=rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='habitly.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportJSON(){
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='habitly-backup.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function restoreJSON(event){
+  const file=event.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const restored=JSON.parse(reader.result);
+      if(!Array.isArray(restored.habits)) throw new Error();
+      data={...DEFAULT,...restored};
+      saveData();
+      renderAll();
+      toast('تم استرجاع النسخة الاحتياطية');
+    }catch(e){
+      toast('ملف النسخة الاحتياطية غير صالح');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function init(){
+  if(data.settings.theme) setTheme(data.settings.theme);
+  renderAll();
+}
+
+document.addEventListener('DOMContentLoaded',init);
